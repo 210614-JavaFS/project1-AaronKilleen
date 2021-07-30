@@ -42,7 +42,7 @@ CREATE TABLE ers_users (
 
 
 CREATE TABLE ers_reimbursement (
-	reimb_id NUMERIC(9) NOT NULL UNIQUE,
+	reimb_id SERIAL NOT NULL UNIQUE,
 	reimb_amount DECIMAL(15,2) NOT NULL,
 	reimb_submitted TIMESTAMP NOT NULL,
 	reimb_resolved TIMESTAMP,
@@ -100,43 +100,145 @@ INSERT INTO ers_users (ers_users_id, ers_username, ers_password, user_first_name
 	VALUES (333222111, 'BaxterBanker', 'password', 'Baxter', 'Banker', 'baxterbanker@email.com', 02);
 
 --example reimbursements
-INSERT INTO ers_reimbursement (reimb_id, reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
-	VALUES (222333444, 400.00, '2021-07-01', '2021-07-07', 'Business Trip Holiday Inn Express',  null, 111222333, 333222111, 02, 01);
+INSERT INTO ers_reimbursement (reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
+	VALUES (400.00, '2021-07-01', '2021-07-07', 'Business Trip Holiday Inn Express',  null, 111222333, 333222111, 02, 01);
 
-INSERT INTO ers_reimbursement (reimb_id, reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
-	VALUES (333444555, 80.00, '2021-07-01', null, 'Magic Shop',  null, 111222333, null, 01, 04);
+INSERT INTO ers_reimbursement ( reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
+	VALUES (80.00, '2021-07-01', null, 'Magic Shop',  null, 111222333, null, 01, 04);
 
 
 --DQL
 
+CREATE OR REPLACE FUNCTION check_type(
+	type_id NUMERIC(2)
+	)
+	RETURNS TABLE(
+	reimbursement_type VARCHAR(10)
+	)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+RETURN QUERY
+SELECT reimb_type
+FROM ers_reimbursement_type
+WHERE type_id = reimb_type_id;
+END;$$;
+
+
+
+
+CREATE OR REPLACE FUNCTION check_status(
+	status_id NUMERIC(2)
+	)
+	RETURNS TABLE(
+	status VARCHAR(10)
+	)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+RETURN QUERY
+SELECT reimb_status
+FROM ers_reimbursement_status
+WHERE reimb_status_id = status_id;
+END;$$;
+
+
+
+--a function that checks login details.
+CREATE OR REPLACE FUNCTION check_login_details(
+	input_username VARCHAR(50),
+	input_password VARCHAR(50)
+	)
+	RETURNS TABLE(
+	username VARCHAR(50),
+	user_password VARCHAR(50)
+	)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+RETURN QUERY
+SELECT ers_users.ers_username, ers_users.ers_password
+FROM ers_users
+WHERE ers_users.ers_username = input_username AND ers_users.ers_password = input_password;
+END;$$;
+
+CREATE OR REPLACE FUNCTION get_user(
+	input_username VARCHAR(50),
+	input_password VARCHAR(50)
+	)
+	RETURNS TABLE(
+	id  NUMERIC(9),
+	username VARCHAR(50),
+	user_password VARCHAR(50),
+	first_name VARCHAR(100),
+	last_name VARCHAR(100),
+	email VARCHAR(150),
+	user_role VARCHAR(10)
+	)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+RETURN QUERY
+SELECT ers_users.ers_users_id, ers_users.ers_username, ers_users.ers_password, ers_users.user_first_name, ers_users.user_last_name, ers_users.user_email, ers_user_roles.user_role
+FROM ers_users INNER JOIN ers_user_roles
+ON ers_users.user_role_id = ers_user_roles.ers_user_role_id
+WHERE ers_users.ers_username = input_username AND ers_users.ers_password = input_password;
+END;$$;
+
+--a function that finds a user from an Id
+CREATE OR REPLACE FUNCTION find_user(
+	user_id NUMERIC(9)
+	)
+	RETURNS TABLE(
+	id  NUMERIC(9),
+	username VARCHAR(50),
+	user_password VARCHAR(50),
+	first_name VARCHAR(100),
+	last_name VARCHAR(100),
+	email VARCHAR(150),
+	user_role VARCHAR(10)
+	)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+RETURN QUERY
+SELECT ers_users.ers_users_id, ers_users.ers_username, ers_users.ers_password, ers_users.user_first_name, ers_users.user_last_name, ers_users.user_email, ers_user_roles.user_role
+FROM ers_users INNER JOIN ers_user_roles
+ON ers_users.user_role_id = ers_user_roles.ers_user_role_id
+WHERE ers_users.ers_users_id = user_id;
+END;$$;
+
+
 --a function that allows employees to view their past reimbursement submissions
+DROP FUNCTION IF EXISTS view_past_reimbursements;
 CREATE OR REPLACE FUNCTION view_past_reimbursements(
 	employee_id int) 
 	RETURNS TABLE (
-	reimb_id NUMERIC(9),
-	reimb_amount DECIMAL(15,2),
-	reimb_submitted TIMESTAMP,
-	reimb_resolved TIMESTAMP,
-	reimb_description VARCHAR(250),
-	reimb_receipt BYTEA,
-	reimb_author NUMERIC(9),
-	reimb_resolver NUMERIC(9),
-	reimb_type VARCHAR(10),
-	reimb_status VARCHAR(10)
+	id INTEGER,
+	amount DECIMAL(15,2),
+	submitted TIMESTAMP,
+	resolved TIMESTAMP,
+	description VARCHAR(250),
+	receipt BYTEA,
+	author NUMERIC(9),
+	resolver NUMERIC(9),
+	type_id NUMERIC(2),
+	status_id NUMERIC(2)
 	)
 LANGUAGE plpgsql
 AS $$
 BEGIN
 	RETURN QUERY
-	SELECT reimbs.reimb_id, reimbs.reimb_amount, reimbs.reimb_submitted, reimbs.reimb_resolved, reimbs.reimb_description, reimbs.reimb_receipt, reimbs.reimb_author, reimbs.reimb_resolver, types.reimb_type, status.reimb_status 
-	FROM ers_reimbursement reimbs INNER JOIN ers_reimbursement_type types ON reimbs.reimb_type_id = types.reimb_type_id INNER JOIN ers_reimbursement_status status ON reimbs.reimb_status_id = status.reimb_status_id 
-	WHERE reimbs.reimb_author = employee_id;
+	SELECT reimb_id, reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_type_id, reimb_status_id 
+	FROM ers_reimbursement
+	WHERE reimb_author = employee_id;
 END;$$;
 
 --a function that allows managers to view all reimbursements
+DROP FUNCTION IF EXISTS view_all_reimbursements;
 CREATE OR REPLACE FUNCTION view_all_reimbursements()
 	RETURNS TABLE (
-	reimb_id NUMERIC(9),
+	reimb_id INTEGER,
 	reimb_amount DECIMAL(15,2),
 	reimb_submitted TIMESTAMP,
 	reimb_resolved TIMESTAMP,
@@ -156,10 +258,11 @@ BEGIN
 END;$$;
 
 --a function for a manager filtering reimbursements by status
+DROP FUNCTION IF EXISTS view_filtered_reimbursements;
 CREATE OR REPLACE FUNCTION view_filtered_reimbursements(
 	status_id int) 
 	RETURNS TABLE (
-	reimb_id NUMERIC(9),
+	reimb_id INTEGER,
 	reimb_amount DECIMAL(15,2),
 	reimb_submitted TIMESTAMP,
 	reimb_resolved TIMESTAMP,
@@ -183,31 +286,33 @@ END;$$;
 SELECT * FROM view_past_reimbursements(111222333);
 SELECT * FROM view_all_reimbursements();
 SELECT * FROM view_filtered_reimbursements(02);
-
-
+SELECT * FROM check_login_details('JohnQPublic', 'password');
+SELECT * FROM get_user('JohnQPublic', 'password');
+SELECT * FROM find_user(111222333);
+SELECT * FROM check_status(1);
+SELECT * FROM check_type(1);
 --TCL
 
 -- a procedure for an employee creating a reimbursement
-CREATE OR REPLACE PROCEDURE create_reimbursement(
-	id INT, amount FLOAT, submitted TIMESTAMP, description VARCHAR(250), receipt BYTEA, author INT, reimb_type INT)
+CREATE OR REPLACE PROCEDURE create_reimbursement( amount FLOAT, description VARCHAR(250), receipt BYTEA, author INT, type_id NUMERIC(2))
 LANGUAGE plpgsql 
 AS $$
 BEGIN
-	INSERT INTO ers_reimbursement (reimb_id, reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
-		VALUES (id, amount, submitted, null, description, receipt, author, null, 01, reimb_type);
+	INSERT INTO ers_reimbursement (reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
+		VALUES (amount, NOW(), null, description, receipt, author, null, 01, type_id);
 	COMMIT;
 END;$$;
  
  -- a procedure that allows a manager to approve a reimbursement 
  CREATE OR REPLACE PROCEDURE approve_reimbursement(
-	id INT, resolved TIMESTAMP, resolver INT)
+	id INT, resolver INT)
 LANGUAGE plpgsql 
 AS $$
 BEGIN
 	UPDATE ers_reimbursement
 	SET 
 		reimb_status_id = 02,
-		reimb_resolved = resolved,
+		reimb_resolved = NOW(),
 		reimb_resolver = resolver
 	WHERE reimb_id = id;
 	COMMIT;
@@ -215,20 +320,21 @@ END;$$;
  
  -- a procedure that allows a manager to deny a reimbursement 
  CREATE OR REPLACE PROCEDURE deny_reimbursement(
-	id INT, resolved TIMESTAMP, resolver INT)
+	id INT, resolver INT)
 LANGUAGE plpgsql 
 AS $$
 BEGIN
 	UPDATE ers_reimbursement
 	SET 
 		reimb_status_id = 03,
-		reimb_resolved = resolved,
+		reimb_resolved = NOW(),
 		reimb_resolver = resolver
 	WHERE reimb_id = id;
 	COMMIT;
 END;$$;
  
 --testing the TCL functions
-CALL create_reimbursement(444555666, 100, '2021-07-08', 'Red Lobster', null, 111222333, 3);
-CALL approve_reimbursement(444555666, '2021-07-15', 333222111);
-CALL deny_reimbursement(333444555, '2021-07-10', 333222111);
+CALL create_reimbursement(100, 'Red Lobster', null, 111222333, 3);
+CALL approve_reimbursement(3, 333222111);
+CALL deny_reimbursement(2, 333222111);
+
