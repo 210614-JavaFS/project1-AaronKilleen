@@ -1,6 +1,5 @@
 package com.revature.web;
 
-import com.revature.models.Reimbursement;
 
 public class RequestContainer {
 	public String state;
@@ -15,4 +14,6 @@ public class RequestContainer {
 	public String receipt;
 	public int statusId;
 	public int typeId;
+	public int reimbursementId;
+	public String resolveStatus;
 }

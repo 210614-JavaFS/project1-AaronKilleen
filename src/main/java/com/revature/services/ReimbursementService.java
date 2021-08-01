@@ -34,13 +34,13 @@ public class ReimbursementService {
 	{
 		return reimbursementDao.getStatus(id);
 	}
-	public void approve(int id, String time, int managerId)
+	public void approve(int id, int managerId)
 	{
-		reimbursementDao.approve(id, time, managerId);
+		reimbursementDao.approve(id, managerId);
 	}
-	public void deny(int id, String time, int managerId)
+	public void deny(int id, int managerId)
 	{
-		reimbursementDao.deny(id, time, managerId);
+		reimbursementDao.deny(id, managerId);
 	}
 	
 	

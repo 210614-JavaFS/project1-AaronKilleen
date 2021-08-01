@@ -12,6 +12,6 @@ public interface ReimbursementDAO {
 	public void addReimbursement(RequestContainer requestContainer);
 	public String getType(int id);
 	public String getStatus(int id);
-	public void approve(int id, String time, int managerId);
-	public void deny(int id, String time, int managerId);
+	public void approve(int id, int managerId);
+	public void deny(int id, int managerId);
 }

@@ -60,9 +60,10 @@ public class UserController {
 				reimbursementsJson = reimbursementsJson.substring(0, reimbursementsJson.length() - 1);
 				reimbursementsJson = reimbursementsJson.substring(0, reimbursementsJson.length() - 1);
 				reimbursementsJson += "]\n}";
-				//System.out.println(reimbursementsJson);
 				responseContainer.state = "manager_menu";
 				responseContainer.id = user.getId();
+				String message = "Welcome " + user.getFirstName() + ".";
+				responseContainer.message = message;
 			}else if(user.getRole().equals("EMPLOYEE"))
 			{
 				System.out.println("Employee Logged in!");
@@ -75,13 +76,18 @@ public class UserController {
 				reimbursementsJson = reimbursementsJson.substring(0, reimbursementsJson.length() - 1);
 				reimbursementsJson = reimbursementsJson.substring(0, reimbursementsJson.length() - 1);
 				reimbursementsJson += "]\n}";
-				//System.out.println(reimbursementsJson);
 				responseContainer.state = "employee_menu";
 				responseContainer.id = user.getId();
+				String message = "Welcome " + user.getFirstName() + ".";
+				responseContainer.message = message;
 			}else
 			{
 				System.out.println("unidentified user role!");
-				responseContainer.state = "login_failed";
+				responseContainer.state = "logged_out";
+				responseContainer.message = "Login Failed, unidentified user role.";
+				String json = objectMapper.writeValueAsString(responseContainer);
+				PrintWriter printWriter = resp.getWriter();;
+				printWriter.print(json);
 				return;
 			}
 			
@@ -90,7 +96,11 @@ public class UserController {
 		}else{
 
 			System.out.println("login failed!");
-			responseContainer.state = "login_failed";
+			responseContainer.state = "logged_out";
+			responseContainer.message = "Login Failed, invalid username or password.";
+			String json = objectMapper.writeValueAsString(responseContainer);
+			PrintWriter printWriter = resp.getWriter();;
+			printWriter.print(json);
 			resp.setStatus(200); 
 			return;
 		}
@@ -99,7 +109,6 @@ public class UserController {
 		String json = objectMapper.writeValueAsString(responseContainer);
 		json = json.substring(0, json.length() - 1);
 		json += reimbursementsJson;
-		System.out.println(json);
 		PrintWriter printWriter = resp.getWriter();;
 		printWriter.print(json);
 

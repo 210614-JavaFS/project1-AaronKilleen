@@ -47,7 +47,7 @@ CREATE TABLE ers_reimbursement (
 	reimb_submitted TIMESTAMP NOT NULL,
 	reimb_resolved TIMESTAMP,
 	reimb_description VARCHAR(250),
-	reimb_receipt BYTEA,
+	reimb_receipt VARCHAR(250),
 	reimb_author NUMERIC(9) NOT NULL,
 	reimb_resolver NUMERIC(9),
 	reimb_status_id NUMERIC(2) NOT NULL,
@@ -219,7 +219,7 @@ CREATE OR REPLACE FUNCTION view_past_reimbursements(
 	submitted TIMESTAMP,
 	resolved TIMESTAMP,
 	description VARCHAR(250),
-	receipt BYTEA,
+	receipt VARCHAR(250),
 	author NUMERIC(9),
 	resolver NUMERIC(9),
 	type_id NUMERIC(2),
@@ -243,7 +243,7 @@ CREATE OR REPLACE FUNCTION view_all_reimbursements()
 	reimb_submitted TIMESTAMP,
 	reimb_resolved TIMESTAMP,
 	reimb_description VARCHAR(250),
-	reimb_receipt BYTEA,
+	reimb_receipt VARCHAR(250),
 	reimb_author NUMERIC(9),
 	reimb_resolver NUMERIC(9),
 	reimb_type VARCHAR(10),
@@ -267,7 +267,7 @@ CREATE OR REPLACE FUNCTION view_filtered_reimbursements(
 	reimb_submitted TIMESTAMP,
 	reimb_resolved TIMESTAMP,
 	reimb_description VARCHAR(250),
-	reimb_receipt BYTEA,
+	reimb_receipt VARCHAR(250),
 	reimb_author NUMERIC(9),
 	reimb_resolver NUMERIC(9),
 	reimb_type VARCHAR(10),
@@ -294,7 +294,7 @@ SELECT * FROM check_type(1);
 --TCL
 
 -- a procedure for an employee creating a reimbursement
-CREATE OR REPLACE PROCEDURE create_reimbursement( amount FLOAT, description VARCHAR(250), receipt BYTEA, author INT, type_id NUMERIC(2))
+CREATE OR REPLACE PROCEDURE create_reimbursement( amount FLOAT, description VARCHAR(250), receipt VARCHAR(250), author INT, type_id NUMERIC(2))
 LANGUAGE plpgsql 
 AS $$
 BEGIN

@@ -30,8 +30,6 @@ public class FrontControllerServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req , HttpServletResponse resp) throws ServletException, IOException {
-		String URI = req.getRequestURI();
-		System.out.println(URI);
 		BufferedReader br=new BufferedReader(req.getReader());    
         String body = "";
         int i;    
@@ -41,7 +39,6 @@ public class FrontControllerServlet extends HttpServlet {
         br.close();  
 		RequestContainer requestContainer;
 		requestContainer = objectMapper.readValue(body, RequestContainer.class);
-		//PrintWriter printWriter = resp.getWriter();
 		switch(requestContainer.state)
 		{
 		case "logged_out":
@@ -54,12 +51,17 @@ public class FrontControllerServlet extends HttpServlet {
 			reimbursementController.addReimbursement(requestContainer, req, resp);
 			break;
 		}
-		
+		case "resolve_reimbursement":
+		{
+			reimbursementController.resolveReimbursement(requestContainer, req, resp);
+			break;
+		}
 		
 		default:
 		System.out.println("State not recognized.");
 		ResponseContainer responseContainer = new ResponseContainer();
-		responseContainer.state = "unrecognized_state";
+		responseContainer.state = "logged_out";
+		responseContainer.message = "unrecognized state.";
 		String json = objectMapper.writeValueAsString(responseContainer);
 		PrintWriter printWriter = resp.getWriter();;
 		printWriter.print(json);

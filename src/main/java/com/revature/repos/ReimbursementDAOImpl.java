@@ -130,8 +130,9 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 	public void addReimbursement(RequestContainer requestContainer)
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
-			String sql = "CALL create_reimbursement(" + requestContainer.amount + "', '" + requestContainer.description + "', '" + requestContainer.receipt + "', " + requestContainer.userId + ", " + requestContainer.typeId + ");";
+			String sql = "CALL create_reimbursement(" + requestContainer.amount + ", '" + requestContainer.description + "', '" + requestContainer.receipt + "', " + requestContainer.userId + ", " + requestContainer.typeId + ");";
 			Statement statement = conn.createStatement();
+			System.out.println(sql);
 			statement.execute(sql);
 	
 			
@@ -191,10 +192,11 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 			return "";
 	}
 
-	public void approve(int id, String time, int managerId)
+	public void approve(int id, int managerId)
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
-			String sql = 	"CALL approve_reimbursement(" + id + " , '"+ time + "' , " + id + " );";
+			String sql = 	"CALL approve_reimbursement(" + id + ", " + managerId + " );";
+			System.out.println(sql);
 			Statement statement = conn.createStatement();
 			statement.execute(sql);
 	
@@ -205,10 +207,11 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 		
 	}
 	
-	public void deny(int id, String time, int managerId)
+	public void deny(int id, int managerId)
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
-			String sql = 	"CALL deny_reimbursement(" + id + " , '"+ time + "' , " + id + " );";
+			String sql = 	"CALL deny_reimbursement(" + id + " , " + managerId + " );";
+			System.out.println(sql);
 			Statement statement = conn.createStatement();
 			statement.execute(sql);
 	

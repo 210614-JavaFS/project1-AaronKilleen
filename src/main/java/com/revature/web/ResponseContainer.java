@@ -8,5 +8,6 @@ public class ResponseContainer {
 	public String role = "";
 	public String firstName = "";
 	public String lastName = "";
+	public String message = "";
 	public int id;
 }
