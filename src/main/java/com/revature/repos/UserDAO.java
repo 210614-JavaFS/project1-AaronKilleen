@@ -8,6 +8,6 @@ public interface UserDAO {
 	
 	public List<User> findAll();
 	public boolean checkLoginDetails(String username, String password);
-	public User getUser(String username, String password);
+	public User getUser(String username);
 	public User getUser(int id);
 }

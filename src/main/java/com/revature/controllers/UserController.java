@@ -45,7 +45,7 @@ public class UserController {
 		ResponseContainer responseContainer = new ResponseContainer();
 		String reimbursementsJson = "";
 		if(userService.login(requestContainer.username, requestContainer.password)) {
-			User user = userService.getUser(requestContainer.username, requestContainer.password);
+			User user = userService.getUser(requestContainer.username);
 			System.out.println("login success!");
 			
 			if(user.getRole().equals("MANAGER"))

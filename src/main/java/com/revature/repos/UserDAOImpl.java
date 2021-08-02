@@ -7,6 +7,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jasypt.util.password.StrongPasswordEncryptor;
+
 import com.revature.models.User;
 import com.revature.utils.ConnectionUtil;
 
@@ -51,28 +53,24 @@ public class UserDAOImpl implements UserDAO {
 	public boolean checkLoginDetails(String username, String password)
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
-			String sql = "SELECT * FROM check_login_details('" + username +"', '" + password + "');";
+
+
+
+			
+
+			String sql = "SELECT * FROM get_password('" + username +"');";
+			System.out.println(sql);
 			Statement statement = conn.createStatement();
 			ResultSet result = statement.executeQuery(sql);
-			String usernameResult = "";
-			String passwordResult = "";
+			String encryptedStoredPassword = "";
 			//ResultSets have a cursor similarly to Scanners or other I/O classes. 
 			while(result.next()) {
-				usernameResult = result.getString("username");
-				passwordResult = result.getString("user_password");
+				encryptedStoredPassword = result.getString("user_password");
 			}
-			
-			if(usernameResult.equals(username)
-					&&(!username.equals(""))
-					&&passwordResult.equals(password)
-					&&(!password.equals("")))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
+			System.out.println(encryptedStoredPassword);
+		    StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
+		    return encryptor.checkPassword(password, encryptedStoredPassword);
+	
 			
 		}catch (SQLException e) {
 			e.printStackTrace();
@@ -80,11 +78,11 @@ public class UserDAOImpl implements UserDAO {
 		return false;
 	}
 	
-	public User getUser(String username, String password)
+	public User getUser(String username)
 	{
 		User user = new User();
 		try(Connection conn = ConnectionUtil.getConnection()){
-			String sql = "SELECT * FROM get_user('" + username +"', '" + password + "');";
+			String sql = "SELECT * FROM get_user('" + username +"');";
 			Statement statement = conn.createStatement();
 			ResultSet result = statement.executeQuery(sql);
 			//ResultSets have a cursor similarly to Scanners or other I/O classes. 

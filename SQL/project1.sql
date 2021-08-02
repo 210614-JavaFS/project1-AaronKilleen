@@ -27,11 +27,11 @@ CREATE TABLE ers_user_roles (
 	PRIMARY KEY (ers_user_role_id)
 );
 
-
+--increased password length from 50 to 100 to accomodate the encryption library.
 CREATE TABLE ers_users (
 	ers_users_id NUMERIC(9) NOT NULL UNIQUE,
 	ers_username VARCHAR(50) NOT NULL UNIQUE,
-	ers_password VARCHAR(50) NOT NULL,
+	ers_password VARCHAR(100) NOT NULL,
 	user_first_name VARCHAR(100) NOT NULL,
 	user_last_name VARCHAR(100) NOT NULL,
 	user_email VARCHAR(150) NOT NULL UNIQUE,
@@ -92,12 +92,12 @@ INSERT INTO ers_user_roles (ers_user_role_id, user_role)
 INSERT INTO ers_user_roles (ers_user_role_id, user_role)
 	VALUES (02, 'MANAGER');
 
---example users
+--example users note: the passwords are both 'password'
 INSERT INTO ers_users (ers_users_id, ers_username, ers_password, user_first_name, user_last_name, user_email, user_role_id)
-	VALUES (111222333, 'JohnQPublic', 'password', 'John', 'Public', 'johnqpublic@email.com', 01);
+	VALUES (111222333, 'JohnQPublic', 'V29vB1dBbc5RyK0Edu/QXU45Ut5DVHkMpYHT50Dz3M64NvdTS22jV1S2Yb+6DB2I', 'John', 'Public', 'johnqpublic@email.com', 01);
 
 INSERT INTO ers_users (ers_users_id, ers_username, ers_password, user_first_name, user_last_name, user_email, user_role_id)
-	VALUES (333222111, 'BaxterBanker', 'password', 'Baxter', 'Banker', 'baxterbanker@email.com', 02);
+	VALUES (333222111, 'BaxterBanker', 'V29vB1dBbc5RyK0Edu/QXU45Ut5DVHkMpYHT50Dz3M64NvdTS22jV1S2Yb+6DB2I', 'Baxter', 'Banker', 'baxterbanker@email.com', 02);
 
 --example reimbursements
 INSERT INTO ers_reimbursement (reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
@@ -143,15 +143,31 @@ WHERE reimb_status_id = status_id;
 END;$$;
 
 
+--a function that gets the password from the username
+CREATE OR REPLACE FUNCTION get_password(
+	input_username VARCHAR(50)
+	)
+	RETURNS TABLE(
+	user_password VARCHAR(100)
+	)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+RETURN QUERY
+SELECT ers_users.ers_password
+FROM ers_users
+WHERE ers_users.ers_username = input_username;
+END;$$;
+
 
 --a function that checks login details.
 CREATE OR REPLACE FUNCTION check_login_details(
 	input_username VARCHAR(50),
-	input_password VARCHAR(50)
+	input_password VARCHAR(100)
 	)
 	RETURNS TABLE(
 	username VARCHAR(50),
-	user_password VARCHAR(50)
+	user_password VARCHAR(100)
 	)
 LANGUAGE plpgsql
 AS $$
@@ -163,8 +179,7 @@ WHERE ers_users.ers_username = input_username AND ers_users.ers_password = input
 END;$$;
 
 CREATE OR REPLACE FUNCTION get_user(
-	input_username VARCHAR(50),
-	input_password VARCHAR(50)
+	input_username VARCHAR(50)
 	)
 	RETURNS TABLE(
 	id  NUMERIC(9),
@@ -182,7 +197,7 @@ RETURN QUERY
 SELECT ers_users.ers_users_id, ers_users.ers_username, ers_users.ers_password, ers_users.user_first_name, ers_users.user_last_name, ers_users.user_email, ers_user_roles.user_role
 FROM ers_users INNER JOIN ers_user_roles
 ON ers_users.user_role_id = ers_user_roles.ers_user_role_id
-WHERE ers_users.ers_username = input_username AND ers_users.ers_password = input_password;
+WHERE ers_users.ers_username = input_username;
 END;$$;
 
 --a function that finds a user from an Id
@@ -192,7 +207,7 @@ CREATE OR REPLACE FUNCTION find_user(
 	RETURNS TABLE(
 	id  NUMERIC(9),
 	username VARCHAR(50),
-	user_password VARCHAR(50),
+	user_password VARCHAR(100),
 	first_name VARCHAR(100),
 	last_name VARCHAR(100),
 	email VARCHAR(150),
