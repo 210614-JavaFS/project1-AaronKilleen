@@ -7,12 +7,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.revature.models.Reimbursement;
 import com.revature.utils.ConnectionUtil;
 import com.revature.web.RequestContainer;
 
 public class ReimbursementDAOImpl implements ReimbursementDAO{
-	
+	private static Logger log = LoggerFactory.getLogger(ReimbursementDAOImpl.class);
 	
 	
 	public List<Reimbursement> findAll()
@@ -20,7 +23,7 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = "SELECT * FROM ers_reimbursement;";
 			Statement statement = conn.createStatement();
-			
+			log.debug(sql);
 			ResultSet result = statement.executeQuery(sql);
 			
 			List<Reimbursement> list = new ArrayList<>();
@@ -58,7 +61,7 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = "SELECT * FROM view_past_reimbursements("+ id + ");";
 			Statement statement = conn.createStatement();
-			
+			log.debug(sql);
 			ResultSet result = statement.executeQuery(sql);
 			
 			List<Reimbursement> list = new ArrayList<>();
@@ -94,7 +97,7 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = "SELECT * FROM view_filtered_reimbursements("+ id + ");";
-			
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			
 			ResultSet result = statement.executeQuery(sql);
@@ -127,20 +130,21 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 				
 	}
 	
-	public void addReimbursement(RequestContainer requestContainer)
+	public boolean addReimbursement(RequestContainer requestContainer)
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = "CALL create_reimbursement(" + requestContainer.amount + ", '" + requestContainer.description + "', '" + requestContainer.receipt + "', " + requestContainer.userId + ", " + requestContainer.typeId + ");";
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			System.out.println(sql);
 			statement.execute(sql);
-	
+			return true;
 			
 		}catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		
+		return false;
 	}
 	
 	
@@ -148,6 +152,7 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = 	"SELECT * FROM check_type(" + id + ");";
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			ResultSet result = statement.executeQuery(sql);
 			
@@ -173,6 +178,7 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = 	"SELECT * FROM check_status(" + id + ");";
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			ResultSet result = statement.executeQuery(sql);
 			
@@ -192,34 +198,34 @@ public class ReimbursementDAOImpl implements ReimbursementDAO{
 			return "";
 	}
 
-	public void approve(int id, int managerId)
+	public boolean approve(int id, int managerId)
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = 	"CALL approve_reimbursement(" + id + ", " + managerId + " );";
-			System.out.println(sql);
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			statement.execute(sql);
 	
-			
+			return true;
 		}catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+		return false;
 	}
 	
-	public void deny(int id, int managerId)
+	public boolean deny(int id, int managerId)
 	{
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = 	"CALL deny_reimbursement(" + id + " , " + managerId + " );";
-			System.out.println(sql);
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			statement.execute(sql);
 	
-			
+		return true;
 		}catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+		return false;
 	}
 
 	

@@ -10,6 +10,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revature.models.Reimbursement;
 import com.revature.models.User;
@@ -19,26 +22,10 @@ import com.revature.web.ResponseContainer;
 import com.revature.web.RequestContainer;
 
 public class UserController {
-	
+	private static Logger log = LoggerFactory.getLogger(UserController.class);
 	private static UserService userService = new UserService();
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private static ReimbursementService reimbursementService = new ReimbursementService();
-	/*
-	public void getAllUsers(HttpServletResponse response) throws IOException {
-		List<User> list = userService.usersAssemble();
-		
-		String json = objectMapper.writeValueAsString(list);
-		
-		System.out.println(json);
-		
-		PrintWriter printWriter = response.getWriter();
-		
-		printWriter.print(json);
-		
-		response.setStatus(200);
-		
-	}
-	*/
 	public void login(RequestContainer requestContainer, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
 	{
 	
@@ -46,11 +33,9 @@ public class UserController {
 		String reimbursementsJson = "";
 		if(userService.login(requestContainer.username, requestContainer.password)) {
 			User user = userService.getUser(requestContainer.username);
-			System.out.println("login success!");
 			
 			if(user.getRole().equals("MANAGER"))
 			{
-				System.out.println("Manager Logged in!");
 				List<Reimbursement> reimbursements = reimbursementService.findAll();
 				reimbursementsJson += ", \n \"reimbursements\": [";
 				for(int i = 0; i < reimbursements.size(); ++i)
@@ -66,7 +51,6 @@ public class UserController {
 				responseContainer.message = message;
 			}else if(user.getRole().equals("EMPLOYEE"))
 			{
-				System.out.println("Employee Logged in!");
 				List<Reimbursement> reimbursements = reimbursementService.findByUser(user.getId());
 				reimbursementsJson += ", \n \"reimbursements\": [";
 				for(int i = 0; i < reimbursements.size(); ++i)
@@ -86,6 +70,7 @@ public class UserController {
 				responseContainer.state = "logged_out";
 				responseContainer.message = "Login Failed, unidentified user role.";
 				String json = objectMapper.writeValueAsString(responseContainer);
+				log.debug(json);
 				PrintWriter printWriter = resp.getWriter();;
 				printWriter.print(json);
 				return;
@@ -99,6 +84,7 @@ public class UserController {
 			responseContainer.state = "logged_out";
 			responseContainer.message = "Login Failed, invalid username or password.";
 			String json = objectMapper.writeValueAsString(responseContainer);
+			log.debug(json);
 			PrintWriter printWriter = resp.getWriter();;
 			printWriter.print(json);
 			resp.setStatus(200); 
@@ -109,6 +95,7 @@ public class UserController {
 		String json = objectMapper.writeValueAsString(responseContainer);
 		json = json.substring(0, json.length() - 1);
 		json += reimbursementsJson;
+		log.debug(json);
 		PrintWriter printWriter = resp.getWriter();;
 		printWriter.print(json);
 

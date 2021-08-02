@@ -101,11 +101,13 @@ INSERT INTO ers_users (ers_users_id, ers_username, ers_password, user_first_name
 
 --example reimbursements
 INSERT INTO ers_reimbursement (reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
-	VALUES (400.00, '2021-07-01', '2021-07-07', 'Business Trip Holiday Inn Express',  null, 111222333, 333222111, 02, 01);
+	VALUES (400.00, '2021-07-01', '2021-07-07', 'Business Trip Holiday Inn Express',  'receipt', 111222333, 333222111, 02, 01);
 
 INSERT INTO ers_reimbursement ( reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
-	VALUES (80.00, '2021-07-01', null, 'Magic Shop',  null, 111222333, null, 01, 04);
+	VALUES (80.00, '2021-07-01', null, 'Magic Shop',  'receipt', 111222333, null, 01, 04);
 
+INSERT INTO ers_reimbursement ( reimb_amount, reimb_submitted, reimb_resolved, reimb_description, reimb_receipt, reimb_author, reimb_resolver, reimb_status_id, reimb_type_id)
+	VALUES (140.00, '2021-07-01', null, 'Outback Steakhouse',  'receipt', 111222333, null, 01, 03);
 
 --DQL
 
@@ -349,7 +351,7 @@ BEGIN
 END;$$;
  
 --testing the TCL functions
-CALL create_reimbursement(100, 'Red Lobster', null, 111222333, 3);
+CALL create_reimbursement(100, 'Red Lobster', 'receipt', 111222333, 3);
 CALL approve_reimbursement(3, 333222111);
-CALL deny_reimbursement(2, 333222111);
+CALL deny_reimbursement(4, 333222111);
 

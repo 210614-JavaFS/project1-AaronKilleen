@@ -8,6 +8,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revature.models.Reimbursement;
 import com.revature.models.User;
@@ -17,7 +20,7 @@ import com.revature.web.RequestContainer;
 import com.revature.web.ResponseContainer;
 
 public class ReimbursementController {
-
+	private static Logger log = LoggerFactory.getLogger(ReimbursementController.class);
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private static ReimbursementService reimbursementService = new ReimbursementService();
 	private UserService userService = new UserService();
@@ -42,12 +45,12 @@ public class ReimbursementController {
 		reimbursementsJson = reimbursementsJson.substring(0, reimbursementsJson.length() - 1);
 		reimbursementsJson = reimbursementsJson.substring(0, reimbursementsJson.length() - 1);
 		reimbursementsJson += "]\n}";
-		//System.out.println(reimbursementsJson);
 		responseContainer.state = "employee_menu";
 		responseContainer.id = user.getId();
 		String json = objectMapper.writeValueAsString(responseContainer);
 		json = json.substring(0, json.length() - 1);
 		json += reimbursementsJson;
+		log.debug(json);
 		PrintWriter printWriter = resp.getWriter();;
 		printWriter.print(json);
 
@@ -85,12 +88,12 @@ public class ReimbursementController {
 		reimbursementsJson = reimbursementsJson.substring(0, reimbursementsJson.length() - 1);
 		reimbursementsJson = reimbursementsJson.substring(0, reimbursementsJson.length() - 1);
 		reimbursementsJson += "]\n}";
-		//System.out.println(reimbursementsJson);
 		responseContainer.state = "manager_menu";
 		responseContainer.id = user.getId();
 		String json = objectMapper.writeValueAsString(responseContainer);
 		json = json.substring(0, json.length() - 1);
 		json += reimbursementsJson;
+		log.debug(json);
 		PrintWriter printWriter = resp.getWriter();;
 		printWriter.print(json);
 

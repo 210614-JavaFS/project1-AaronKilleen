@@ -22,9 +22,9 @@ public class ReimbursementService {
 	{
 		return reimbursementDao.findByStatus(id);
 	}
-	public void addReimbursement(RequestContainer requestContainer)
+	public boolean addReimbursement(RequestContainer requestContainer)
 	{
-		reimbursementDao.addReimbursement(requestContainer);
+		return reimbursementDao.addReimbursement(requestContainer);
 	}
 	public String getType(int id)
 	{
@@ -34,13 +34,13 @@ public class ReimbursementService {
 	{
 		return reimbursementDao.getStatus(id);
 	}
-	public void approve(int id, int managerId)
+	public boolean approve(int id, int managerId)
 	{
-		reimbursementDao.approve(id, managerId);
+		return reimbursementDao.approve(id, managerId);
 	}
-	public void deny(int id, int managerId)
+	public boolean deny(int id, int managerId)
 	{
-		reimbursementDao.deny(id, managerId);
+		return reimbursementDao.deny(id, managerId);
 	}
 	
 	

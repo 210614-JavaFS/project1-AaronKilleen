@@ -11,16 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revature.controllers.ReimbursementController;
 import com.revature.controllers.UserController;
-import com.revature.services.UserService;
 
-//import com.revature.controllers.UserController;
 
 @SuppressWarnings("serial")
 public class FrontControllerServlet extends HttpServlet {
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private UserController userController = new UserController();
-	private UserService userService = new UserService();
 	private ReimbursementController reimbursementController = new ReimbursementController();
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)

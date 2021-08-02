@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jasypt.util.password.StrongPasswordEncryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.revature.models.User;
 import com.revature.utils.ConnectionUtil;
@@ -16,12 +18,12 @@ import com.revature.utils.ConnectionUtil;
 
 
 public class UserDAOImpl implements UserDAO {
-
+	private static Logger log = LoggerFactory.getLogger(UserDAOImpl.class);
 	@Override
 	public List<User> findAll() {
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = "SELECT * FROM users";
-			
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			
 			ResultSet result = statement.executeQuery(sql);
@@ -59,7 +61,7 @@ public class UserDAOImpl implements UserDAO {
 			
 
 			String sql = "SELECT * FROM get_password('" + username +"');";
-			System.out.println(sql);
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			ResultSet result = statement.executeQuery(sql);
 			String encryptedStoredPassword = "";
@@ -83,6 +85,7 @@ public class UserDAOImpl implements UserDAO {
 		User user = new User();
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = "SELECT * FROM get_user('" + username +"');";
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			ResultSet result = statement.executeQuery(sql);
 			//ResultSets have a cursor similarly to Scanners or other I/O classes. 
@@ -106,7 +109,7 @@ public class UserDAOImpl implements UserDAO {
 		User user = new User();
 		try(Connection conn = ConnectionUtil.getConnection()){
 			String sql = "SELECT * FROM find_user(" + id + ");";
-
+			log.debug(sql);
 			Statement statement = conn.createStatement();
 			ResultSet result = statement.executeQuery(sql);
 			//ResultSets have a cursor similarly to Scanners or other I/O classes. 
